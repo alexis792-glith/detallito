@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Kathe ✨</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pastelPink: '#ffd1dc',
+                        pastelRose: '#ffb7c5',
+                        pastelPurple: '#e8dff5',
+                        softPurple: '#c9b6e4',
+                        cozyWarm: '#fff8f0',
+                        deepPurple: '#4a3e6d',
+                        nightDark: '#121020',
+                        nightCard: '#1d1933'
+                    },
+                    fontFamily: {
+                        sans: ['Quicksand', 'Nunito', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&family=Quicksand:wght@500;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 50%, #e8eaf6 100%);
+            min-height: 100vh;
+            transition: background 0.8s ease, color 0.8s ease;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        body.night-mode {
+            background: linear-gradient(135deg, #0d0b18 0%, #17122b 50%, #1f1a3a 100%);
+            color: #f3e8ff;
+        }
+
+        /* Floating background elements */
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            animation: floatUp linear infinite;
+            opacity: 0.6;
+            z-index: 1;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) scale(0.5) rotate(0deg);
+                opacity: 0;
+            }
+            20% { opacity: 0.7; }
+            80% { opacity: 0.7; }
+            100% {
+                transform: translateY(-10vh) scale(1.2) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Entrance card animations */
+        .card-anim {
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.85) translateY(20px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        /* Pulse for the Yes Button */
+        .pulse-btn {
+            animation: gentlePulse 2s infinite;
+        }
+
+        @keyframes gentlePulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 10px 25px -5px rgba(244, 114, 182, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 15px 30px -5px rgba(244, 114, 182, 0.7); }
+        }
+
+        /* Canvas overlay */
+        #heartCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        /* Vinyl rotating animation for Night Mode Music Player */
+        .spin-vinyl {
+            animation: spin 4s linear infinite;
+        }
+        .spin-paused {
+            animation-play-state: paused;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-between min-h-screen p-4 sm:p-6 relative selection:bg-pink-200">
+
+    <!-- Confetti & Heart Sparkle Canvas -->
+    <canvas id="heartCanvas"></canvas>
+
+    <!-- Floating Particles Container -->
+    <div id="particleContainer"></div>
+
+    <!-- Header Controls Bar -->
+    <header class="w-full max-w-xl flex justify-between items-center z-20 mb-4">
+        <!-- Night Mode / Mode 3 AM Toggle -->
+        <button id="modeToggle" onclick="toggleNightMode()" class="px-4 py-2 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-md shadow-md hover:shadow-lg transition-all border border-pink-200/50 flex items-center gap-2 text-sm font-bold text-gray-700">
+            <i class="fa-solid fa-moon text-indigo-500" id="modeIcon"></i>
+            <span id="modeText">Modo 3:00 AM</span>
+        </button>
+
+        <!-- Mini Audio Player Widget (Simulated Vibes) -->
+        <div id="musicWidget" class="flex items-center gap-3 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-md border border-pink-200/50 text-xs font-semibold text-gray-700">
+            <div id="vinylDisc" class="w-6 h-6 rounded-full bg-slate-900 flex items-center justify-center text-white spin-vinyl spin-paused">
+                <i class="fa-solid fa-compact-disc text-pink-400"></i>
+            </div>
+            <span class="hidden sm:inline">Arctic Vibes 🎶</span>
+            <button onclick="toggleMusic()" class="text-pink-500 hover:text-pink-600 font-bold p-1">
+                <i class="fa-solid fa-play" id="playIcon"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Interactive Card -->
+    <main class="relative z-10 w-full max-w-lg bg-white/85 dark:bg-slate-900/85 backdrop-blur-lg rounded-3xl p-6 sm:p-8 shadow-2xl border border-white/60 dark:border-slate-800 text-center card-anim transition-colors duration-500 my-auto">
+        
+        <!-- Header Icon Badge -->
+        <div id="badgeIconContainer" class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-pink-100 dark:bg-pink-900/40 text-pink-500 mb-6 shadow-inner text-2xl transition-all">
+            <i class="fa-solid fa-sparkles text-pink-400" id="headerIcon"></i>
+        </div>
+
+        <!-- VIEW 1: PREGUNTA PRINCIPAL -->
+        <div id="questionView" class="space-y-6">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 dark:text-gray-100 tracking-tight leading-snug">
+                ¿Eres bonita? <span class="inline-block animate-bounce">✨</span>
+            </h1>
+            <p class="text-gray-500 dark:text-gray-400 text-base font-medium">
+                Responde con total sinceridad, Kathe 👀
+            </p>
+
+            <!-- Buttons Area -->
+            <div id="buttonArea" class="relative min-h-[140px] flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                <!-- SÍ BUTTON -->
+                <button id="yesBtn" onclick="handleYesClick()" class="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 text-white font-extrabold rounded-2xl shadow-lg pulse-btn transition-all transform active:scale-95 text-lg flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-heart"></i> Sí
+                </button>
+
+                <!-- NO BUTTON (Slightly dodges or opens custom warning) -->
+                <button id="noBtn" onclick="handleNoClick()" onmouseenter="dodgeNoBtn()" class="w-full sm:w-auto px-8 py-3.5 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 text-gray-600 dark:text-gray-300 font-extrabold rounded-2xl shadow transition-all duration-200 text-lg flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-xmark"></i> No
+                </button>
+            </div>
+        </div>
+
+        <!-- VIEW 2: PANTALLA SI PRESIONA "NO" -->
+        <div id="noView" class="hidden space-y-6">
+            <div class="inline-block p-4 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full text-4xl animate-bounce">
+                🤔
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-800 dark:text-gray-100 leading-snug">
+                ¿Por qué mientes Kathe? 🤔
+            </h2>
+            <div class="bg-purple-50 dark:bg-purple-950/40 p-5 rounded-2xl border border-purple-100 dark:border-purple-800 shadow-sm">
+                <p class="text-lg sm:text-xl font-bold text-purple-700 dark:text-purple-300">
+                    Eres muy bonita, súper genial, tienes una vibra única, me encanta pasar tiempo contigo, eres una chica muy chevere, contigo el tiempo vuela. ✨💖
+                </p>
+            </div>
+
+            <button onclick="resetView()" class="px-6 py-3 bg-pink-400 hover:bg-pink-500 text-white font-bold rounded-xl shadow-md transition transform hover:scale-105 active:scale-95 text-base flex items-center justify-center gap-2 mx-auto">
+                <i class="fa-solid fa-arrow-rotate-left"></i> Decir la verdad ahora
+            </button>
+        </div>
+
+        <!-- VIEW 3: PANTALLA SI PRESIONA "SÍ" -->
+        <div id="yesView" class="hidden space-y-6">
+            <div class="inline-block p-4 bg-pink-100 dark:bg-pink-900/40 text-pink-500 rounded-full text-4xl animate-pulse">
+                💖
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-pink-600 dark:text-pink-400 leading-snug">
+                ¡Así me gusta Kathe! ✨
+            </h2>
+            <div class="bg-gradient-to-r from-pink-50 to-purple-50 dark:from-slate-800 dark:to-purple-950/40 p-5 rounded-2xl border border-pink-100 dark:border-purple-800 shadow-sm space-y-2">
+                <p class="text-xl font-bold text-gray-800 dark:text-gray-200">
+                    Con autoestima alta 😎
+                </p>
+                <p class="text-base sm:text-lg text-gray-700 dark:text-gray-300 font-medium">
+                    Y es toda la verdad: <br><strong class="text-purple-600 dark:text-purple-300 font-extrabold text-lg sm:text-xl">eres preciosa, super divertida, contigo el tiempo vuela, me sacas siempre muchas risas, me ayudas a desestresarme, ya quiero verte en persona y conocerte a fondo. ✨💖</strong>
+                </p>
+            </div>
+
+            <button onclick="resetView()" class="px-6 py-3 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white font-bold rounded-xl shadow-md transition transform hover:scale-105 active:scale-95 text-base flex items-center justify-center gap-2 mx-auto">
+                <i class="fa-solid fa-arrows-rotate"></i> Volver a responder
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Interactive Section: Reasons why Kathe is awesome -->
+    <section class="w-full max-w-lg relative z-10 mt-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-5 shadow-lg border border-white/60 dark:border-slate-800 text-center">
+        <h3 class="text-lg font-extrabold text-gray-700 dark:text-gray-200 mb-3 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-wand-magic-sparkles text-pink-400"></i> Generator de razones por las que Kathe es genial
+        </h3>
+        
+        <div id="reasonCard" class="min-h-[70px] flex items-center justify-center bg-pink-50/70 dark:bg-slate-800/70 p-4 rounded-xl border border-pink-100 dark:border-slate-700 mb-4 transition-all">
+            <p id="reasonText" class="text-sm sm:text-base text-purple-900 dark:text-purple-200 font-bold italic">
+                "Haz clic abajo para descubrir una razón aleatoria..."
+            </p>
+        </div>
+
+        <button onclick="generateRandomReason()" class="px-5 py-2.5 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white font-bold rounded-xl shadow transition transform hover:scale-105 active:scale-95 text-sm flex items-center justify-center gap-2 mx-auto">
+            <i class="fa-solid fa-dice text-yellow-200"></i> Ver otra razón
+        </button>
+    </section>
+
+    <!-- Footer -->
+    <footer class="relative z-10 mt-6 text-center text-xs text-gray-500 dark:text-gray-400 font-medium">
+        Hecho con dedicada programación para Kathe ✨
+    </footer>
+
+    <!-- JavaScript Application Code -->
+    <script>
+        // --- Web Audio API Synth (Sounds without external mp3 dependencies) ---
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+        }
+
+        function playSound(type) {
+            try {
+                initAudio();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'yes') {
+                    // Celebratory chord succession
+                    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                    notes.forEach((freq, idx) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+
+                        gain.gain.setValueAtTime(0.12, now + idx * 0.08);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.35);
+
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+
+                        osc.start(now + idx * 0.08);
+                        osc.stop(now + idx * 0.08 + 0.4);
+                    });
+                } else if (type === 'no') {
+                    // Playful 'oops' pitch drop
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(360, now);
+                    osc.frequency.exponentialRampToValueAtTime(200, now + 0.25);
+
+                    gain.gain.setValueAtTime(0.18, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'dodge') {
+                    // Soft pop when dodging
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.exponentialRampToValueAtTime(850, now + 0.06);
+
+                    gain.gain.setValueAtTime(0.04, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.06);
+                }
+            } catch (e) {
+                // Fallback silently if browser restricts sound
+            }
+        }
+
+        // --- Simulated Ambient Music Track (Soft chill Synth Pad) ---
+        let isPlayingMusic = false;
+        let musicOsc1, musicOsc2, musicGain;
+
+        function toggleMusic() {
+            initAudio();
+            const playIcon = document.getElementById('playIcon');
+            const vinyl = document.getElementById('vinylDisc');
+
+            if (!isPlayingMusic) {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                // Create a cozy ambient synthesizer chord (Chill Night Vibe)
+                musicOsc1 = audioCtx.createOscillator();
+                musicOsc2 = audioCtx.createOscillator();
+                musicGain = audioCtx.createGain();
+
+                musicOsc1.type = 'sine';
+                musicOsc2.type = 'triangle';
+
+                // Soft A-major chord frequencies
+                musicOsc1.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+                musicOsc2.frequency.setValueAtTime(277.18, audioCtx.currentTime); // C#4
+
+                musicGain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                musicGain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 1);
+
+                musicOsc1.connect(musicGain);
+                musicOsc2.connect(musicGain);
+                musicGain.connect(audioCtx.destination);
+
+                musicOsc1.start();
+                musicOsc2.start();
+
+                playIcon.className = "fa-solid fa-pause";
+                vinyl.classList.remove('spin-paused');
+                isPlayingMusic = true;
+            } else {
+                if (musicGain) {
+                    musicGain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+                    setTimeout(() => {
+                        musicOsc1.stop();
+                        musicOsc2.stop();
+                    }, 500);
+                }
+                playIcon.className = "fa-solid fa-play";
+                vinyl.classList.add('spin-paused');
+                isPlayingMusic = false;
+            }
+        }
+
+        // --- Night Mode Toggle ---
+        function toggleNightMode() {
+            document.body.classList.toggle('night-mode');
+            const modeIcon = document.getElementById('modeIcon');
+            const modeText = document.getElementById('modeText');
+
+            if (document.body.classList.contains('night-mode')) {
+                modeIcon.className = "fa-solid fa-sun text-yellow-400";
+                modeText.innerText = "Modo Día";
+            } else {
+                modeIcon.className = "fa-solid fa-moon text-indigo-500";
+                modeText.innerText = "Modo 3:00 AM";
+            }
+        }
+
+        // --- Floating Particles ---
+        function createParticles() {
+            const container = document.getElementById('particleContainer');
+            const icons = ['✨', '💖', '🌸', '⭐', '💕', '🌙'];
+
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.innerHTML = icons[Math.floor(Math.random() * icons.length)];
+                
+                particle.style.left = `${Math.random() * 100}vw`;
+                particle.style.fontSize = `${14 + Math.random() * 16}px`;
+                particle.style.animationDuration = `${6 + Math.random() * 6}s`;
+                particle.style.animationDelay = `${Math.random() * 5}s`;
+
+                container.appendChild(particle);
+            }
+        }
+
+        // --- Dodging logic for No Button ---
+        let dodgeCount = 0;
+        const noBtn = document.getElementById('noBtn');
+
+        function dodgeNoBtn() {
+            if (dodgeCount < 3) {
+                dodgeCount++;
+                playSound('dodge');
+                const x = (Math.random() - 0.5) * 180;
+                const y = (Math.random() - 0.5) * 90;
+                noBtn.style.transform = `translate(${x}px, ${y}px) scale(${1 - dodgeCount * 0.12})`;
+            }
+        }
+
+        // --- Event Handlers ---
+        function handleNoClick() {
+            playSound('no');
+            document.getElementById('questionView').classList.add('hidden');
+            document.getElementById('noView').classList.remove('hidden');
+            document.getElementById('noView').classList.add('card-anim');
+            document.getElementById('badgeIconContainer').className = "inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/40 text-red-500 mb-6 shadow-inner text-2xl";
+            document.getElementById('headerIcon').className = "fa-solid fa-face-grimace text-red-400";
+        }
+
+        function handleYesClick() {
+            playSound('yes');
+            document.getElementById('questionView').classList.add('hidden');
+            document.getElementById('yesView').classList.remove('hidden');
+            document.getElementById('yesView').classList.add('card-anim');
+            document.getElementById('badgeIconContainer').className = "inline-flex items-center justify-center w-16 h-16 rounded-full bg-yellow-100 dark:bg-yellow-900/40 text-yellow-500 mb-6 shadow-inner text-2xl";
+            document.getElementById('headerIcon').className = "fa-solid fa-crown text-yellow-400";
+            
+            triggerHeartsConfetti();
+        }
+
+        function resetView() {
+            dodgeCount = 0;
+            noBtn.style.transform = 'none';
+            
+            document.getElementById('noView').classList.add('hidden');
+            document.getElementById('yesView').classList.add('hidden');
+            document.getElementById('questionView').classList.remove('hidden');
+            document.getElementById('questionView').classList.add('card-anim');
+            document.getElementById('badgeIconContainer').className = "inline-flex items-center justify-center w-16 h-16 rounded-full bg-pink-100 dark:bg-pink-900/40 text-pink-500 mb-6 shadow-inner text-2xl";
+            document.getElementById('headerIcon').className = "fa-solid fa-sparkles text-pink-400";
+        }
+
+        // --- Reasons Generator for Kathe ---
+        const reasons = [
+            "Tiene un humor unico, siempre me hace reir. 😂",
+            "Hace que las llamadas de 3 horas se sientan como si hubieran pasado solo 5 minutos. ⏳✨",
+            "Es súper auténtica, reservada y tierna. 💖",
+            "su voz me da mucha confianza, me encanta pasar tiempo con ella. 😎",
+            "Su compañía convierte cualquier noche normal en un momento súper especial. 🌙✨",
+            "Tiene una vibra preciosa que transmite muchísima paz y confianza. 🌸"
+        ];
+
+        let lastIndex = -1;
+        function generateRandomReason() {
+            playSound('dodge');
+            let randomIndex;
+            do {
+                randomIndex = Math.floor(Math.random() * reasons.length);
+            } while (randomIndex === lastIndex);
+            
+            lastIndex = randomIndex;
+            const reasonCard = document.getElementById('reasonCard');
+            const reasonText = document.getElementById('reasonText');
+
+            reasonCard.classList.add('scale-95', 'opacity-50');
+            setTimeout(() => {
+                reasonText.innerText = `"${reasons[randomIndex]}"`;
+                reasonCard.classList.remove('scale-95', 'opacity-50');
+            }, 150);
+        }
+
+        // --- Heart Confetti Canvas Animation ---
+        const canvas = document.getElementById('heartCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function triggerHeartsConfetti() {
+            particles = [];
+            const colors = ['#ffb7c5', '#c9b6e4', '#ffd1dc', '#ff69b4', '#e8dff5'];
+            
+            for (let i = 0; i < 90; i++) {
+                particles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 14,
+                    vy: (Math.random() - 0.75) * 14,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    size: Math.random() * 12 + 6,
+                    alpha: 1,
+                    decay: Math.random() * 0.015 + 0.01
+                });
+            }
+        }
+
+        function drawHeart(x, y, size, color, alpha) {
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            const topCurveHeight = size * 0.3;
+            ctx.moveTo(x, y + topCurveHeight);
+            ctx.bezierCurveTo(x, y, x - size / 2, y, x - size / 2, y + topCurveHeight);
+            ctx.bezierCurveTo(x - size / 2, y + (size + topCurveHeight) / 2, x, y + size, x, y + size);
+            ctx.bezierCurveTo(x, y + size, x + size / 2, y + (size + topCurveHeight) / 2, x + size / 2, y + topCurveHeight);
+            ctx.bezierCurveTo(x + size / 2, y, x, y, x, y + topCurveHeight);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach((p, index) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.22; // gravity
+                p.alpha -= p.decay;
+
+                if (p.alpha <= 0) {
+                    particles.splice(index, 1);
+                } else {
+                    drawHeart(p.x, p.y, p.size, p.color, p.alpha);
+                }
+            });
+
+            requestAnimationFrame(animateCanvas);
+        }
+
+        window.onload = function() {
+            createParticles();
+            animateCanvas();
+        };
+    </script>
+</body>
+</html>
