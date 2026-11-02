@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panoramas con Kathe ✨🎡</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pastelPink: '#ffd1dc',
+                        pastelRose: '#ffb7c5',
+                        pastelPurple: '#e8dff5',
+                        softPurple: '#c9b6e4',
+                        cozyWarm: '#fff8f0',
+                        deepPurple: '#4a3e6d',
+                        nightDark: '#121020',
+                        nightCard: '#1d1933'
+                    },
+                    fontFamily: {
+                        sans: ['Quicksand', 'Nunito', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&family=Quicksand:wght@500;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 50%, #e8eaf6 100%);
+            min-height: 100vh;
+            transition: background 0.8s ease, color 0.8s ease;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        body.night-mode {
+            background: linear-gradient(135deg, #0d0b18 0%, #17122b 50%, #1f1a3a 100%);
+            color: #f3e8ff;
+        }
+
+        /* Floating background elements */
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            animation: floatUp linear infinite;
+            opacity: 0.6;
+            z-index: 1;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) scale(0.5) rotate(0deg);
+                opacity: 0;
+            }
+            20% { opacity: 0.7; }
+            80% { opacity: 0.7; }
+            100% {
+                transform: translateY(-10vh) scale(1.2) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Entrance animations */
+        .card-anim {
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.85) translateY(20px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        /* Box pulse glow animation */
+        .glow-box {
+            animation: boxGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes boxGlow {
+            0%, 100% {
+                box-shadow: 0 10px 25px -5px rgba(236, 72, 153, 0.25), 0 0 15px rgba(168, 85, 247, 0.15);
+            }
+            50% {
+                box-shadow: 0 15px 35px -5px rgba(236, 72, 153, 0.45), 0 0 25px rgba(168, 85, 247, 0.35);
+            }
+        }
+
+        /* Canvas overlay */
+        #sparkleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-between min-h-screen p-4 sm:p-6 relative selection:bg-pink-200">
+
+    <!-- Sparkle & Hearts Canvas -->
+    <canvas id="sparkleCanvas"></canvas>
+
+    <!-- Floating Particles Container -->
+    <div id="particleContainer"></div>
+
+    <!-- Header Controls Bar -->
+    <header class="w-full max-w-xl flex justify-between items-center z-20 mb-6">
+        <!-- Volver a Inicio -->
+        <a href="index.html" class="px-4 py-2 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-md shadow-md hover:shadow-lg transition-all border border-pink-200/50 hover:border-pink-300 flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-200 hover:scale-105 active:scale-95">
+            <i class="fa-solid fa-arrow-left text-pink-500"></i>
+            <span>Volver a Inicio</span>
+        </a>
+
+        <!-- Night Mode Toggle -->
+        <button id="modeToggle" onclick="toggleNightMode()" class="px-4 py-2 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-md shadow-md hover:shadow-lg transition-all border border-pink-200/50 flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-200 hover:scale-105 active:scale-95">
+            <i class="fa-solid fa-moon text-indigo-500" id="modeIcon"></i>
+            <span id="modeText">Modo nocturno</span>
+        </button>
+    </header>
+
+    <!-- Main Container -->
+    <main class="relative z-10 w-full max-w-lg bg-white/85 dark:bg-slate-900/85 backdrop-blur-lg rounded-3xl p-6 sm:p-8 shadow-2xl border border-white/60 dark:border-slate-800 text-center card-anim transition-colors duration-500 my-auto">
+        
+        <!-- Header Badge -->
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-pink-100 dark:bg-pink-900/40 text-pink-500 mb-4 shadow-inner text-2xl">
+            <i class="fa-solid fa-compass text-pink-400"></i>
+        </div>
+
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 dark:text-gray-100 tracking-tight leading-snug mb-2">
+            curiosidades
+        </h1>
+        <p class="text-gray-500 dark:text-gray-400 text-sm sm:text-base font-medium mb-6">
+            ¿Aún crees que no me conoces?, te doy algunas curiosidades de mi👀
+        </p>
+
+        <!-- CAJA INTERACTIVA (CLICKABLE BOX) -->
+        <div id="panoramaBox" onclick="selectRandomPanorama()" class="glow-box group cursor-pointer relative bg-gradient-to-br from-pink-50 via-purple-50 to-pink-100 dark:from-slate-800 dark:via-purple-950/40 dark:to-slate-800/90 rounded-3xl p-8 sm:p-10 border-2 border-dashed border-pink-300 dark:border-purple-600 transition-all duration-300 hover:scale-[1.03] active:scale-95 select-none">
+            
+            <!-- Default Placeholder State -->
+            <div id="boxPlaceholder" class="space-y-4">
+                <div class="text-5xl sm:text-6xl animate-bounce">
+                    🎁
+                </div>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-extrabold text-pink-600 dark:text-pink-400 group-hover:text-pink-500 transition-colors">
+                        ¡Toca aquí para descubrir una curiosidad!
+                    </h2>
+                    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">
+                        (Haz clic o pulsa la caja)
+                    </p>
+                </div>
+            </div>
+
+            <!-- Result State (Hidden Initially) -->
+            <div id="boxResult" class="hidden space-y-4">
+                <div id="resultIcon" class="text-5xl sm:text-6xl transition-transform transform">
+                    🎬
+                </div>
+                <div>
+                    <span class="inline-block px-3 py-1 bg-pink-200/80 dark:bg-pink-900/60 text-pink-700 dark:text-pink-300 rounded-full text-xs font-bold tracking-wider uppercase mb-2">
+                        curiosidad seleccionada
+                    </span>
+                    <h2 id="resultText" class="text-2xl sm:text-3xl font-black text-purple-700 dark:text-purple-300 tracking-tight">
+                        lol
+                    </h2>
+                    <p id="resultNote" class="text-sm font-semibold text-gray-600 dark:text-gray-300 mt-2 italic">
+                        "preparate"
+                    </p>
+                </div>
+                <div class="pt-2 text-xs font-bold text-pink-500 dark:text-pink-400 opacity-80 flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-rotate"></i> Toca de nuevo para cambiar de curiosidad
+                </div>
+            </div>
+        </div>
+
+        <!-- Optional Action Button -->
+        <div class="mt-6">
+            <button onclick="selectRandomPanorama()" class="px-6 py-3 bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 text-white font-extrabold rounded-2xl shadow-lg transition-all transform hover:scale-105 active:scale-95 text-base inline-flex items-center justify-center gap-2">
+                <i class="fa-solid fa-dice text-yellow-200"></i>
+                <span>Girar</span>
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 mt-6 text-center text-xs text-gray-500 dark:text-gray-400 font-medium">
+        Hecho con cariño para Kathe ✨
+    </footer>
+
+    <!-- JavaScript Application Code -->
+    <script>
+        // --- Web Audio API Synth ---
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+        }
+
+        function playPopSound() {
+            try {
+                initAudio();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const now = audioCtx.currentTime;
+                // Sparkling arpeggio chime
+                const freqs = [587.33, 739.99, 880.00, 1174.66]; // D5, F#5, A5, D6
+                freqs.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.05);
+
+                    gain.gain.setValueAtTime(0.08, now + idx * 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.05 + 0.3);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc.start(now + idx * 0.05);
+                    osc.stop(now + idx * 0.05 + 0.35);
+                });
+            } catch (e) {
+                // Silently ignore if blocked by browser policy
+            }
+        }
+
+        // --- Night Mode Toggle ---
+        function toggleNightMode() {
+            document.body.classList.toggle('night-mode');
+            const modeIcon = document.getElementById('modeIcon');
+            const modeText = document.getElementById('modeText');
+
+            if (document.body.classList.contains('night-mode')) {
+                modeIcon.className = "fa-solid fa-sun text-yellow-400";
+                modeText.innerText = "Modo Día";
+            } else {
+                modeIcon.className = "fa-solid fa-moon text-indigo-500";
+                modeText.innerText = "Modo nocturno";
+            }
+        }
+
+        // --- Floating Particles ---
+        function createParticles() {
+            const container = document.getElementById('particleContainer');
+            const icons = ['✨', '🎡', '🌸', '🍿', '💕', '⭐', '🛼'];
+
+            for (let i = 0; i < 18; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.innerHTML = icons[Math.floor(Math.random() * icons.length)];
+                
+                particle.style.left = `${Math.random() * 100}vw`;
+                particle.style.fontSize = `${14 + Math.random() * 16}px`;
+                particle.style.animationDuration = `${6 + Math.random() * 6}s`;
+                particle.style.animationDelay = `${Math.random() * 5}s`;
+
+                container.appendChild(particle);
+            }
+        }
+
+        // --- Panoramas Data ---
+        // EXACT phrases required: "ver peliculas", "caminar por el parque", "dormir en la calle", "salir a patinar"
+        const panoramas = [
+            {
+                text: "soy fan de leer libros",
+                icon: "🧐 🤓",
+                note: "soy fan de los libros de stephen king y la saga de narnia"
+            },
+            {
+                text: "no soy emo ni otaku",
+                icon: "🫪 🤣",
+                note: "aunque lo parezca pero no soy emo jaja y me baño, asi que no soy otaku, solo veo anime (a veces)"
+            },
+            {
+                text: "roblox es de mis juegos favs",
+                icon: "🎮 😂",
+                note: "tambien soy fan de la saga de fnaf y the last of us"
+            },
+            {
+                text: "soy demasiado cosquilloso",
+                icon: "😵‍💫 👀",
+                note: "tengo cosquillas en casi todo el cuerpo, me tocas y me dan cosquillas es increible"
+            },
+            {
+                text: "escucho musica casi todo el dia",
+                icon: "😵‍💫 🎶",
+                note: "me encanta escuchar musica todo el día, me hace sentir libre y me despejo de mi dia a dia"
+            },
+            {
+                text: "en perú conocí mi verdadera casa",
+                icon: "😋 🤣",
+                note: "en chile a veces me sentía como fuera de lugar, pero en perú descubrí mi hogar, me siento peruano a veces"
+            },
+            {
+                text: "odio los aviones",
+                icon: " 🤣 😂",
+                note: "aunque esté casi acostumbrado a volar, odio los aviones y los aeropuertos, me dan flojera y las turbulencias me dan muchisimo miedo"
+            },
+            {
+                text: "soy fan de sporting cristal",
+                icon: "🫪 🤪",
+                note: "al principio fui como por la experiencia, pero me gustó el ambiente familiar, incluso tengo amigos que nos vemos solo en el estadio"
+            },
+            {
+               text: "soy gordito pero tengo mucho cardio",
+                icon: "🥴 🫪",
+                note: "puedo correr,correr y correr, pero no me canso hasta bastante tiempo, mucha gente se sorprende, o me toca los brazos y si tengo musculos, solo que tengo un poco de pancita jeje"
+            },
+            {
+                text: "odio usar lentes",
+                icon: "👀 😋",
+                note: "aunque los necesite no me gusta, me siento incomodo, aunque esté casi obligado a usarlos"
+            },
+            {
+                text:"mi color favorito es el azul",
+                icon: "😋 🤪",
+                note: "el azul me encanta, normalmente siempre lo uso en mis habitaciones o en mis personajes de videojuegos",
+            },
+            {
+                text:"uno de mis mayores sueños es conocer noruega o inglaterra",
+                icon: "😁 😉",
+                note: "estoy juntando dinero, es mi meta lograrlo",
+            },
+            {
+                text:"soy desorganizado con mis tiempos",
+                icon: "🤓 👀",
+                note: "soy desorganizado con mis tiempos, pero si me comprometo a llegar a una hora lo cumplo, soy muy puntual",
+            },
+            {
+                text:"soy muy emocional",
+                icon: "😅 😖",
+                note: "aunque no lo parezca soy muy emocional, me gusta dar cariño o recibirlo, tambien soy demasiado sensible cuando me dicen groserias o me insultan feo",
+            },
+            {
+                text:"tengo valores firmes y no me gustan las injusticias",
+                icon: "😋 🫪",
+                note: "a veces la gente se molesta cuando no cedo a algunas cosas o cuando yo siento que hay una injusticia me dicen metiche, pero es como una necesidad",
+            },
+            {
+                text:"soy fan de los deportes de combate",
+                icon: "🥊 🥋",
+                note: "hice boxeo como 6 años, tambien hice muay thai, jiu jitsu y taekwondo, me gusta la disciplina que hay que tener y el respeto que se tiene ante el rival",
+            },
+            {
+                text:"dark souls me salvó",
+                icon: "🫪 😅",
+                note: "en mi momento mas profundo de mi vida, conocí un juego llamado dark souls 3, ese juego literalmente me salvó la vida, es una historia larga me tienes que preguntar",
+            },
+            {
+                text:"soy fan de pokemon",
+                icon: "🤓 🤓",
+                note: "mis favoritos son emolga y gengar",
+            },
+        ];
+
+        let lastIndex = -1;
+
+        function selectRandomPanorama() {
+            playPopSound();
+
+            let randomIndex;
+            do {
+                randomIndex = Math.floor(Math.random() * panoramas.length);
+            } while (panoramas.length > 1 && randomIndex === lastIndex);
+
+            lastIndex = randomIndex;
+            const selected = panoramas[randomIndex];
+
+            const box = document.getElementById('panoramaBox');
+            const placeholder = document.getElementById('boxPlaceholder');
+            const result = document.getElementById('boxResult');
+            const resultIcon = document.getElementById('resultIcon');
+            const resultText = document.getElementById('resultText');
+            const resultNote = document.getElementById('resultNote');
+
+            // Quick shake/pulse animation on click
+            box.classList.add('scale-95');
+            setTimeout(() => {
+                placeholder.classList.add('hidden');
+                result.classList.remove('hidden');
+
+                resultIcon.innerHTML = selected.icon;
+                resultText.innerText = selected.text;
+                resultNote.innerText = selected.note;
+
+                box.classList.remove('scale-95');
+                triggerSparkles();
+            }, 120);
+        }
+
+        // --- Sparkle Confetti Effect ---
+        const canvas = document.getElementById('sparkleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function triggerSparkles() {
+            particles = [];
+            const colors = ['#f472b6', '#c084fc', '#fb7185', '#38bdf8', '#facc15'];
+            const boxRect = document.getElementById('panoramaBox').getBoundingClientRect();
+            const originX = boxRect.left + boxRect.width / 2;
+            const originY = boxRect.top + boxRect.height / 2;
+
+            for (let i = 0; i < 70; i++) {
+                particles.push({
+                    x: originX,
+                    y: originY,
+                    vx: (Math.random() - 0.5) * 12,
+                    vy: (Math.random() - 0.6) * 12,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    size: Math.random() * 8 + 4,
+                    alpha: 1,
+                    decay: Math.random() * 0.02 + 0.015
+                });
+            }
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach((p, index) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.2; // gravity
+                p.alpha -= p.decay;
+
+                if (p.alpha <= 0) {
+                    particles.splice(index, 1);
+                } else {
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            });
+
+            requestAnimationFrame(animateCanvas);
+        }
+
+        window.onload = function() {
+            createParticles();
+            animateCanvas();
+        };
+    </script>
+</body>
+</html>
